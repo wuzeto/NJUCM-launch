@@ -1,0 +1,87 @@
+# depslib dependency file v1.0
+1670942374 source:d:\wu\general-c\system\wu.c
+
+1670944833 source:d:\wu\general-c\system\1.c
+	<stdio.h>
+	"wu.h"
+
+1670946327 d:\wu\general-c\system\wu.h
+
+1670942942 source:d:\wu\general-c\system\2.c
+	<stdio.h>
+	"wu.h"
+	<string.h>
+
+1670943232 source:d:\wu\general-c\system\3.c
+	<stdio.h>
+	"wu.h"
+	<string.h>
+
+1670943842 source:d:\wu\general-c\system\4.c
+	<stdio.h>
+	"wu.h"
+
+1670946762 source:d:\wu\general-c\system\5.c
+	<stdio.h>
+	"wu.h"
+
+1670943920 source:d:\wu\general-c\system\6.c
+	<stdio.h>
+	"wu.h"
+
+1670948944 source:d:\wu\general-c\system\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<ctime>
+	<cstring>
+	<iostream>
+	<fstream>
+	<iomanip>
+	<windows.h>
+
+1670946497 d:\wu\general-c\system\1.c
+	<stdio.h>
+	"wu.h"
+	<fstream>
+
+1670942942 d:\wu\general-c\system\2.c
+	<stdio.h>
+	"wu.h"
+	<string.h>
+
+1670943232 d:\wu\general-c\system\3.c
+	<stdio.h>
+	"wu.h"
+	<string.h>
+
+1670943842 d:\wu\general-c\system\4.c
+	<stdio.h>
+	"wu.h"
+
+1670944879 d:\wu\general-c\system\5.c
+	<stdio.h>
+	"wu.h"
+
+1670944230 d:\wu\general-c\system\6.c
+	<stdio.h>
+	<iostream>
+	"wu.h"
+
+1670946187 d:\wu\general-c\system\6.cpp
+	<iostream>
+	<fstream>
+	<iomanip>
+	"wu.h"
+
+1670946187 source:d:\wu\general-c\system\6.cpp
+	<iostream>
+	<fstream>
+	<iomanip>
+	"wu.h"
+
+1670946582 source:d:\wu\general-c\system\1.cpp
+	<iostream>
+	<fstream>
+	<iomanip>
+	"wu.h"
+
