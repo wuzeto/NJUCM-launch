@@ -1,0 +1,68 @@
+
+在app.py中，添加静态文件夹路径的设置和保存图片到该路径的代码：
+
+import os
+from flask import Flask, render_template, request, url_for
+import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error, r2_score
+from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from wordcloud import WordCloud
+import tensorflow as tf
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense
+from mpl_toolkits.mplot3d import Axes3D
+
+app = Flask(__name__)
+app.config['STATIC_FOLDER'] = 'static'  # 设置静态文件夹路径
+
+# ... 省略中间部分代码 ...
+
+@app.route('/generate_wordcloud', methods=['POST'])
+def generate_wordcloud():
+    text = request.form['text']
+    word_list = jieba.lcut(text)
+    processed_text = " ".join(word_list)
+
+    font_path = 'C:/Windows/Fonts/SIMLI.TTF'
+    font_prop = FontProperties(fname=font_path, size=16)
+
+    wordcloud = WordCloud(font_path=font_path).generate(processed_text)
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.savefig(os.path.join(app.config['STATIC_FOLDER'], 'wordcloud.png'))  # 保存图片到静态文件夹
+
+    return render_template('index3.html', wordcloud_image='wordcloud.png')  # 返回保存图片的名称
+
+@app.route('/neural_network_3d_plot', methods=['POST'])
+def neural_network_3d_plot():
+    X = np.random.rand(100, 3)
+    y = np.random.randint(0, 2, 100)
+
+    model = Sequential()
+    model.add(Dense(64, input_dim=3, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    model.fit(X, y, epochs=10, batch_size=32)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y)
+    ax.set_xlabel('X1')
+    ax.set_ylabel('X2')
+    ax.set_zlabel('X3')
+    plt.savefig(os.path.join(app.config['STATIC_FOLDER'], '3d_plot.png'))  # 保存图片到静态文件夹
+
+    return render_template('index3.html', three_d_plot_image='3d_plot.png')  # 返回保存图片的名称
+
+# ... 省略中间部分代码 ...
+
+if __name__ == '__main__':
+    app.run(debug=True)
+

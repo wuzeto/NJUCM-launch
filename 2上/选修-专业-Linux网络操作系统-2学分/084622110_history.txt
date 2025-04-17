@@ -1,0 +1,15 @@
+    1  ping www.baidu.com
+    2  su root
+    3  whoami
+    4  pwd
+    5  su root
+    6  mkdir /temp
+    7  su root
+    8  sudo rm -r /temp
+    9  su -
+   10  groupadd class
+   11  su -
+   12  mkdir -p temp/dir1/dir2/dir3/test
+   13  sudo chown -R root:root temp
+   14  history
+   15  history > 084622109_history.txt
