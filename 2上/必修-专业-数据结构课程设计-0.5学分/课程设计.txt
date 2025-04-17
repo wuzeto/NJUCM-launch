@@ -1,0 +1,300 @@
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <vector>
+#include <sstream>
+
+using namespace std;
+
+class TrainTicket {
+public:
+    string trainNo; // 火车班次
+    string startStation; // 起点站
+    string endStation; // 终点站
+    string departureTime; // 出发时间
+    string arrivalTime; // 到达时间
+    int seatCount; // 座位数量
+    int remainingCount; // 余票数量
+
+    TrainTicket(string no, string start, string end, string depart, string arrive, int seats, int remain) {
+        trainNo = no;
+        startStation = start;
+        endStation = end;
+        departureTime = depart;
+        arrivalTime = arrive;
+        seatCount = seats;
+        remainingCount = remain;
+    }
+};
+
+class TrainOrder {
+public:
+    string orderNo; // 订单编号
+    string trainNo; // 火车班次
+    string startStation; // 起点站
+    string endStation; // 终点站
+    string departureTime; // 出发时间
+    string arrivalTime; // 到达时间
+    string seatType; // 座位类型
+    int seatCount; // 购票数量
+    int status; // 订单状态，0：未支付，1：已支付，2：已取消
+
+    TrainOrder(string no, string train, string start, string end, string depart, string arrive, string type, int count) {
+        orderNo = no;
+        trainNo = train;
+        startStation = start;
+        endStation = end;
+        departureTime = depart;
+        arrivalTime = arrive;
+        seatType = type;
+        seatCount = count;
+        status = 0; // 默认未支付
+    }
+};
+
+class TicketSystem {
+public:
+    vector<TrainTicket> trainList; // 火车班次列表
+    vector<TrainOrder> orderList; // 订单列表
+    vector<pair<string, int>> waitList; // 候补队列，pair中存放用户名和等待次序
+
+    // 添加火车班次
+    void addTrainTicket(string no, string start, string end, string depart, string arrive, int seats, int remain) {
+        TrainTicket ticket(no, start, end, depart, arrive, seats, remain);
+        trainList.push_back(ticket);
+    }
+
+    // 查询余票数量
+    int getRemainingCount(string trainNo, string date) {
+        for (int i = 0; i < trainList.size(); i++) {
+            if (trainList[i].trainNo == trainNo) {
+                return trainList[i].remainingCount;
+            }
+        }
+        return -1;
+    }
+
+    // 购票
+    bool buyTicket(string trainNo, string date, string seatType, int count, string username) {
+        for (int i = 0; i < trainList.size(); i++) {
+            if (trainList[i].trainNo == trainNo) {
+                if (trainList[i].remainingCount >= count) {
+                    // 更新余票数量
+                    trainList[i].remainingCount -= count;
+
+                    // 生成订单
+                    time_t t = time(0);
+                    struct tm* now = localtime(&t);
+                    string orderNo = to_string(now->tm_year + 1900) + to_string(now->tm_mon + 1) + to_string(now->tm_mday) + to_string(now->tm_hour) + to_string(now->tm_min) + to_string(now->tm_sec);
+                    TrainOrder order(orderNo, trainNo, trainList[i].startStation, trainList[i].endStation, trainList[i].departureTime, trainList[i].arrivalTime, seatType, count);
+                    orderList.push_back(order);
+
+                    cout << "购票成功，订单号为：" << orderNo << endl;
+                    return true;
+                } else {
+                    // 余票不足，加入候补队列
+                    waitList.push_back(make_pair(username, count));
+                    cout << "余票不足，已加入候补队列" << endl;
+                    return false;
+                }
+            }
+        }
+        cout << "无此班次" << endl;
+        return false;
+    }
+
+    // 退票
+    bool refundTicket(string orderNo) {
+        for (int i = 0; i < orderList.size(); i++) {
+            if (orderList[i].orderNo == orderNo) {
+                if (orderList[i].status == 1) {
+                    cout << "该订单已支付，不能退票" << endl;
+                    return false;
+                } else {
+                    // 更新余票数量
+                    for (int j = 0; j < trainList.size(); j++) {
+                        if (trainList[j].trainNo == orderList[i].trainNo) {
+                            trainList[j].remainingCount += orderList[i].seatCount;
+                        }
+                    }
+
+                    // 更新订单状态
+                    orderList[i].status = 2;
+
+                    cout << "退票成功" << endl;
+                    return true;
+                }
+            }
+        }
+        cout << "无此订单" << endl;
+        return false;
+    }
+
+    // 显示火车班次信息
+    void showTrainInfo() {
+        for (int i = 0; i < trainList.size(); i++) {
+            cout << "班次：" << trainList[i].trainNo << " 出发时间：" << trainList[i].departureTime << " 到达时间：" << trainList[i].arrivalTime << " 余票数量：" << trainList[i].remainingCount << endl;
+        }
+    }
+
+    // 显示订单信息
+    void showOrderInfo() {
+        for (int i = 0; i < orderList.size(); i++) {
+            string status;
+            if (orderList[i].status == 0) {
+                status = "未支付";
+            } else if (orderList[i].status == 1) {
+                status = "已支付";
+            } else {
+                status = "已取消";
+            }
+            cout << "订单号：" << orderList[i].orderNo << " 班次：" << orderList[i].trainNo << " 出发时间：" << orderList[i].departureTime << " 到达时间：" << orderList[i].arrivalTime << " 座位类型：" << orderList[i].seatType << " 数量：" << orderList[i].seatCount << " 状态：" << status << endl;
+        }
+    }
+
+    // 查询订单状态
+    void queryOrderStatus(string orderNo) {
+        for (int i = 0; i < orderList.size(); i++) {
+            if (orderList[i].orderNo == orderNo) {
+                string status;
+                if (orderList[i].status == 0) {
+                    status = "未支付";
+                } else if (orderList[i].status == 1) {
+                    status = "已支付";
+                } else {
+                    status = "已取消";
+                }
+                cout << "订单号：" << orderList[i].orderNo << " 班次：" << orderList[i].trainNo << " 出发时间：" << orderList[i].departureTime << " 到达时间：" << orderList[i].arrivalTime << " 座位类型：" << orderList[i].seatType << " 数量：" << orderList[i].seatCount << " 状态：" << status << endl;
+                return;
+            }
+        }
+        cout << "无此订单" << endl;
+    }
+
+    // 查询火车班次的发车和到站时间
+    void queryTrainTime(string trainNo) {
+        for (int i = 0; i < trainList.size(); i++) {
+            if (trainList[i].trainNo == trainNo) {
+                cout << "火车班次：" << trainList[i].trainNo << endl;
+                cout << "发车时间：" << trainList[i].departureTime << endl;
+                cout << "到站时间：" << trainList[i].arrivalTime << endl;
+                return;
+            }
+        }
+        cout << "无此班次" << endl;
+    }
+
+    // 查询候补队列
+    void showWaitList() {
+        if (waitList.empty()) {
+            cout << "候补队列为空" << endl;
+            return;
+        }
+
+        cout << "候补队列：" << endl;
+        for (int i = 0; i < waitList.size(); i++) {
+            cout << "用户名：" << waitList[i].first << " 等待次序：" << i+1 << " 购票数量：" << waitList[i].second << endl;
+        }
+    }
+};
+
+int main() {
+    TicketSystem ticketSystem;
+
+    // 添加火车班次信息
+    ticketSystem.addTrainTicket("G7035", "南京", "上海", "06:31", "08:35", 500, 500); // 添加南京到上海的火车班次信息
+
+    while (true) {
+        cout << "请输入指令编号（1-购票，2-退票，3-查询余票，4-查询订单，5-查询订单状态，6-查询发车到站时间，7-查询候补队列，0-退出）：" << endl;
+        int command;
+        cin >> command;
+
+        switch (command) {
+            case 1: {
+            cout << "请输入火车班次：" << endl;
+            string trainNo;
+            cin >> trainNo;
+            cout << "请输入购票日期：" << endl;
+            string date;
+            cin >> date;
+            cout << "请输入座位类型：" << endl;
+            string seatType;
+            cin >> seatType;
+            cout << "请输入购票数量：" << endl;
+            int count;
+            cin >> count;
+            cout << "请输入用户名：" << endl;
+            string username;
+            cin >> username;
+
+            ticketSystem.buyTicket(trainNo, date, seatType, count, username);
+            break;
+        }
+        case 2: {
+            cout << "请输入订单号：" << endl;
+            string orderNo;
+            cin >> orderNo;
+
+            ticketSystem.refundTicket(orderNo);
+            break;
+        }
+        case 3: {
+            cout << "请输入火车班次：" << endl;
+            string trainNo;
+            cin >> trainNo;
+            cout << "请输入购票日期：" << endl;
+            string date;
+            cin >> date;
+
+            int remainingCount = ticketSystem.getRemainingCount(trainNo, date);
+            if (remainingCount >= 0) {
+                cout << "余票数量：" << remainingCount << endl;
+            } else {
+                cout << "无此班次" << endl;
+            }
+            break;
+        }
+        case 4: {
+            ticketSystem.showOrderInfo();
+            break;
+        }
+        case 5: {
+            cout << "请输入订单号：" << endl;
+            string orderNo;
+            cin >> orderNo;
+
+            ticketSystem.queryOrderStatus(orderNo);
+            break;
+        }
+            case 6: {
+                cout << "请输入火车班次：" << endl;
+                string trainNo;
+                cin >> trainNo;
+
+                // 查询火车班次的发车和到站时间
+                for (int i = 0; i < ticketSystem.trainList.size(); i++) {
+                    if (ticketSystem.trainList[i].trainNo == trainNo) {
+                        cout << "火车班次：" << ticketSystem.trainList[i].trainNo << endl;
+                        cout << "发车时间：" << ticketSystem.trainList[i].departureTime << endl;
+                        cout << "到站时间：" << ticketSystem.trainList[i].arrivalTime << endl;
+                        break;
+                    }
+                }
+                break;
+            }
+            case 7: {
+                ticketSystem.showWaitList();
+                break;
+            }
+            case 0: {
+                return 0;
+            }
+            default: {
+                cout << "无效指令" << endl;
+                break;
+            }
+        }
+
+        cout << endl;
+    }
+}
