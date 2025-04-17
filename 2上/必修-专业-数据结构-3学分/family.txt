@@ -1,0 +1,246 @@
+孙钟 孙坚 孙策 孙权 孙翊 孙匡 孙朗 孙绍 孙登 孙虑 孙和 孙霸 孙奋 孙休 孙亮 孙松 孙泰 孙璠 孙英 孙希 孙皓 孙俊 孙德 孙谦 孙基 孙壹 孙# 孙秀 孙瑾 孙俭
+
+孙钟 孙坚
+孙坚 孙策 孙权 孙翊 孙匡 孙朗
+孙策 孙绍
+孙权 孙登 孙虑 孙和 孙霸 孙奋 孙休 孙亮
+孙翊 孙松
+孙匡 孙泰
+孙登 孙璠 孙英 孙希
+孙和 孙皓 孙俊 孙德 孙谦
+孙霸 孙基 孙壹
+孙休 孙#
+孙泰 孙秀
+孙皓 孙瑾
+孙秀 孙俭
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// 定义节点类
+class Node {
+public:
+string name;
+Node* parent;
+Node* firstChild;
+Node* nextSibling;
+
+Node(string name) : name(name), parent(nullptr), firstChild(nullptr), nextSibling(nullptr) {}
+};
+
+// 定义家谱类
+class FamilyTree {
+public:
+Node* root;
+
+FamilyTree(string rootName) {
+    root = new Node(rootName);
+}
+
+Node* find(string name, Node* node) {
+    if (node == nullptr) {
+        return nullptr;
+    }
+    if (node->name == name) {
+        return node;
+    }
+    Node* found = find(name, node->firstChild);
+    if (found != nullptr) {
+        return found;
+    }
+    return find(name, node->nextSibling);
+}
+
+void addParentChild(string parentName, string childName) {
+    Node* parentNode = find(parentName, root);
+    if (parentNode == nullptr) {
+        cout << "没有找到双亲！" << endl;
+        return;
+    }
+    Node* childNode = new Node(childName);
+    childNode->parent = parentNode;
+    if (parentNode->firstChild == nullptr) {
+        parentNode->firstChild = childNode;
+    } else {
+        Node* sibling = parentNode->firstChild;
+        while (sibling->nextSibling != nullptr) {
+            sibling = sibling->nextSibling;
+        }
+        sibling->nextSibling = childNode;
+    }
+}
+
+void findParentSiblings(Node* node) {
+    if (node != nullptr) { // 添加一个检查，避免父节点为空指针
+        Node *parent = node->parent;
+        if (parent != nullptr) {
+            cout << node->name << " ";
+        }
+    } else {
+        cout << "无";
+    }
+}
+
+void findCurrentSiblings(Node* node) {
+    Node* parent = node->parent;
+    if (parent != nullptr) {
+        Node* sibling = parent->firstChild;
+        while (sibling != nullptr) {
+            if (sibling->name != node->name) {
+                cout << sibling->name << " ";
+            }
+            sibling = sibling->nextSibling;
+        }
+    }
+}
+
+void findChildren(Node* node) {
+    Node* child = node->firstChild;
+    while (child != nullptr) {
+        cout << child->name << " ";
+        child = child->nextSibling;
+    }
+}
+
+void findRelatives(string name) {
+    Node* node = find(name, root);
+    if (node == nullptr) {
+        cout << "家谱中没有这个人！" << endl;
+        return;
+    }
+    cout << name << "的上一代亲属为：";
+    findParentSiblings(node->parent);
+    cout << endl;
+
+    cout << name << "的同辈亲属为：";
+    findCurrentSiblings(node);
+    cout << endl;
+
+    cout << name << "的下一代亲属为：";
+    findChildren(node);
+    cout << endl;
+}
+
+void mergeFamily(FamilyTree& otherTree, string parentName, string childName) {
+    Node* parentNode = find(parentName, root);
+    if (parentNode == nullptr) {
+        cout << "没有找到双亲！" << endl;
+        return;
+    }
+    Node* childNode = otherTree.find(childName, otherTree.root);
+    if (childNode == nullptr) {
+        cout << "要合并的成员不在另一个家谱中！" << endl;
+        return;
+    }
+    childNode->parent = parentNode;
+    if (parentNode->firstChild == nullptr) {
+        parentNode->firstChild = childNode;
+    } else {
+        Node* sibling = parentNode->firstChild;
+        while (sibling->nextSibling != nullptr) {
+            sibling = sibling->nextSibling;
+        }
+        sibling->nextSibling = childNode;
+    }
+    cout << "成功合并家谱！" << endl;
+}
+
+void deleteMember(string name) {
+    Node* node = find(name, root);
+    if (node == nullptr) {
+        cout << "家谱中没有这个人！" << endl;
+        return;
+    }
+    if (node->parent == nullptr) {
+        cout << "根节点不能删除！" << endl;
+        return;
+    }
+    Node* parent = node->parent;
+    if (parent->firstChild == node) {
+        parent->firstChild = node->nextSibling;
+    } else {
+        Node* sibling = parent->firstChild;
+        while (sibling->nextSibling != node) {
+            sibling = sibling->nextSibling;
+        }
+        sibling->nextSibling = node->nextSibling;
+    }
+    delete node;
+    cout << "成功删除成员！" << endl;
+}
+};
+
+int main() {
+FamilyTree tree("孙钟");
+
+wifstream file("family.txt");
+file.imbue(locale("zh_CN.UTF-8"));
+wstring line;
+while (getline(file, line)) {
+    string str(line.begin(), line.end());
+    size_t pos = str.find(' ');
+    string parentName = str.substr(0, pos);
+    string childName = str.substr(pos + 1);
+    tree.addParentChild(parentName, childName);
+}
+file.close();
+
+int choice;
+string name, parentName, childName;
+while (true) {
+    system("cls");
+    cout << "******欢迎来到家谱管理系统！******" << endl;
+    cout << "请选择要执行的操作：" << endl;
+    cout << "1. 查找成员是否在家谱中" << endl;
+    cout << "2. 查找指定成员的上下三代以内亲属" << endl;
+    cout << "3. 合并家谱" << endl;
+    cout << "4. 删除家谱中的成员" << endl;
+    cout << "0. 退出" << endl;
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            cout << "请输入要查找的成员名字: ";
+            cin >> name;
+            if (tree.find(name, tree.root) != nullptr) {
+                cout << "该成员在家谱中！" << endl;
+            } else {
+                cout << "该成员不在家谱中！" << endl;
+            }
+            break;
+        case 2:
+            cout << "请输入要查找的成员名字: ";
+            cin >> name;
+            tree.findRelatives(name);
+            break;
+        case 3: {
+            cout << "请输入要合并的成员的双亲名字: ";
+            cin >> parentName;
+            cout << "请输入要合并的成员名字: ";
+            cin >> childName;
+            FamilyTree otherTree("其他家谱");
+            otherTree.addParentChild(parentName, childName);
+            tree.mergeFamily(otherTree, parentName, childName);
+            break;
+        }
+        case 4:
+            cout << "请输入要删除的成员名字: ";
+            cin >> name;
+            tree.deleteMember(name);
+            break;
+        case 0:
+            return 0;
+        default:
+            cout << "无效的选择！" << endl;
+            break;
+    }
+    cout << "按回车键继续...";
+    cin.get(); // 等待用户按下回车键
+    cin.get(); // 暂停等待用户按下回车键
+}
+
+return 0;
+}

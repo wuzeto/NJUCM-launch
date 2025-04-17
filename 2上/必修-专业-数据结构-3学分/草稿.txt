@@ -1,0 +1,90 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+vector<int> add(vector<int>& a, vector<int>& b) {
+    int m = a.size(), n = b.size();
+    int len = max(m, n);
+
+    vector<int> result;
+    int carry = 0;
+
+    for (int i = len - 1; i >= 0; i--) {
+        int sum = carry;
+        if (m - (len - i) >= 0) {
+            sum += a[m - (len - i)];
+        }
+        if (n - (len - i) >= 0) {
+            sum += b[n - (len - i)];
+        }
+        result.push_back(sum % 10);
+        carry = sum / 10;
+    }
+
+    if (carry > 0) {
+        result.push_back(carry);
+    }
+
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+vector<int> multiply(vector<int>& a, vector<int>& b) {
+    int m = a.size(), n = b.size();
+    vector<int> result(m + n, 0);
+
+    for (int i = m - 1; i >= 0; i--) {
+        for (int j = n - 1; j >= 0; j--) {
+            int product = a[i] * b[j];
+            int p1 = i + j, p2 = i + j + 1;
+            int sum = product + result[p2];
+
+            result[p1] += sum / 10;
+            result[p2] = sum % 10;
+        }
+    }
+
+    while (!result.empty() && result.front() == 0) {
+        result.erase(result.begin());
+    }
+
+    return result;
+}
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    cin >> n;
+
+    vector<int> b(n);
+    for (int i = 0; i < n; i++) {
+        cin >> b[i];
+    }
+
+    vector<int> c = add(a, b);
+    vector<int> d = multiply(a, b);
+
+    cout << "加法结果输出数据如下：" << endl;
+    cout << c.size() << " ";
+    for (int num : c) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    cout << "乘法结果输出数据如下：" << endl;
+    cout << d.size() << " ";
+    for (int num : d) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    return 0;
+}

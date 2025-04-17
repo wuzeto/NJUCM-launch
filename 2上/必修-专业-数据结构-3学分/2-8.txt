@@ -1,0 +1,16 @@
+/******************************
+    顺表类SeqList的插入操作 
+*******************************/
+template <class DataType>  
+void SeqList<DataType> :: Insert(int i, DataType x)
+{
+  	if (length >= MaxSize) 
+	  	throw "上溢";
+  	if (i < 1 || i > length + 1) 
+	  	throw "位置";
+  	for (int j = length; j >= i; j--)
+		data[j] = data[j - 1];              //第j个元素存在数组下标为j-1处
+  	data[i - 1] = x;
+  	length++;
+}
+

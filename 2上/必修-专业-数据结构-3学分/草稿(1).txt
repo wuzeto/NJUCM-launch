@@ -1,0 +1,148 @@
+#include <iostream>
+using namespace std;
+
+template <typename DataType>
+class SeqList {
+private:
+    DataType data[1005];
+    int length;
+
+public:
+    SeqList() {
+        length = 0;
+    }
+
+    void Insert(int index, DataType item) {
+        for (int i = length; i > index; i--) {
+            data[i] = data[i - 1];
+        }
+        data[index] = item;
+        length++;
+    }
+
+    void Delete(int index) {
+        for (int i = index; i < length - 1; i++) {
+            data[i] = data[i + 1];
+        }
+        length--;
+    }
+
+    DataType Get(int index) const {
+        return data[index];
+    }
+
+    int Length() const {
+        return length;
+    }
+};
+
+template <typename DataType>
+SeqList<DataType> Add(const SeqList<DataType>& A, const SeqList<DataType>& B) {
+    SeqList<DataType> C;
+    int lengthA = A.Length();
+    int lengthB = B.Length();
+    int len = max(lengthA, lengthB);
+    DataType carry = 0;
+
+    for (int i = 0; i < len; i++) {
+        DataType sum = carry;
+        if (i < lengthA) {
+            sum += A.Get(i);
+        }
+        if (i < lengthB) {
+            sum += B.Get(i);
+        }
+        C.Insert(0, sum % 10);
+        carry = sum / 10;
+    }
+
+    if (carry > 0) {
+        C.Insert(0, carry);
+    }
+
+    return C;
+}
+
+template <typename DataType>
+SeqList<DataType> Multiply(const SeqList<DataType>& A, const SeqList<DataType>& B) {
+    int lengthA = A.Length();
+    int lengthB = B.Length();
+    int len = lengthA + lengthB;
+
+    SeqList<DataType> C;
+
+    for (int i = 0; i < len; i++) {
+        C.Insert(0, 0);
+    }
+
+    for (int i = 0; i < lengthA; i++) {
+        for (int j = 0; j < lengthB; j++) {
+            DataType product = A.Get(lengthA - 1 - i) * B.Get(lengthB - 1 - j);
+            DataType carry = product / 10;
+            DataType remainder = product % 10;
+            int k = i + j;
+
+            while (remainder > 0 || carry > 0) {
+                DataType sum = C.Get(k) + remainder;
+                C.Insert(k, sum % 10);
+                carry += sum / 10;
+                remainder = carry % 10;
+                carry /= 10;
+                k++;
+            }
+        }
+    }
+
+    while (C.Length() > 1 && C.Get(C.Length() - 1) == 0) {
+        C.Delete(C.Length() - 1);
+        len--;
+    }
+
+    return C;
+}
+
+
+int main() {
+    int n;
+    cout << "请输入第一个整数的位数：";
+    cin >> n;
+
+    SeqList<int> A;
+    cout << "请依次输入第一个整数的每一位数字：";
+    for (int i = 0; i < n; i++) {
+        int item;
+        cin >> item;
+        A.Insert(0, item);
+    }
+
+    int m;
+    cout << "请输入第二个整数的位数：";
+    cin >> m;
+
+    SeqList<int> B;
+    cout << "请依次输入第二个整数的每一位数字：";
+    for (int i = 0; i < m; i++) {
+        int item;
+        cin >> item;
+        B.Insert(0, item);
+    }
+
+    SeqList<int> addRes = Add(A, B);
+    SeqList<int> mulRes = Multiply(A, B);
+
+    cout << "加法结果为：";
+    cout << addRes.Length() << " ";
+    for (int i = 0; i < addRes.Length(); i++) {
+        cout << addRes.Get(i) << " ";
+    }
+    cout << endl;
+
+    cout << "乘法结果为：";
+    cout << mulRes.Length() << " ";
+    for (int i = 0; i < mulRes.Length(); i++) {
+        cout << mulRes.Get(i) << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
